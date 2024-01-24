@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../go-basics-2"
+		},
+		{
+			"path": "../go-basics-practice-1"
+		},
+		{
+			"path": "../pointers"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../structs-practice"
+		}
+	],
+	"settings": {}
+}
