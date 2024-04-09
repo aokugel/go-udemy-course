@@ -14,6 +14,15 @@
 		},
 		{
 			"path": "../structs-practice"
+		},
+		{
+			"path": "../arrays-slices"
+		},
+		{
+			"path": "../functions-dd"
+		},
+		{
+			"path": "../practice-project"
 		}
 	],
 	"settings": {}
