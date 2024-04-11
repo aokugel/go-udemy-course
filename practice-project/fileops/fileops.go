@@ -3,11 +3,7 @@ package fileops
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"os"
-
-	"example.com/practice-project/conversion"
 )
 
 type FileManager struct {
@@ -26,55 +22,51 @@ func New(InputValueFilePath, OperandValuePath, OutputFilePath string) *FileManag
 
 }
 
-func (fm *FileManager) GetInputFromFile(mode string) ([]float64, error) {
-	var inputMode string
-	switch mode {
-	case "input":
-		inputMode = fm.InputValueFilePath
-	case "operand":
-		inputMode = fm.OperandValuePath
-	default:
-		return nil, errors.New("error, please pass a string of either \"input\" or \"operand\" values")
-	}
-	file, err := os.Open(inputMode)
+func (fm *FileManager) GetInputFromFile() ([]string, []string, error) {
+	priceFile, err := os.Open(fm.InputValueFilePath)
+	taxFile, err2 := os.Open(fm.InputValueFilePath)
 	if err != nil {
-		fmt.Println("error")
-		return []float64{}, err
+		return []string{}, []string{}, err
 	}
 
-	defer file.Close()
+	if err2 != nil {
+		return []string{}, []string{}, err
+	}
 
-	scanner := bufio.NewScanner(file)
-	var lines []string
+	defer priceFile.Close()
+	defer taxFile.Close()
+
+	scanner := bufio.NewScanner(priceFile)
+	var priceLines []string
 
 	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+		priceLines = append(priceLines, scanner.Text())
 	}
 
-	scanner.Err()
-	file.Close()
-	return conversion.StringsToFloats(lines)
+	err = scanner.Err()
+	priceFile.Close()
+
+	scanner = bufio.NewScanner(taxFile)
+	var taxLines []string
+	for scanner.Scan() {
+		taxLines = append(taxLines, scanner.Text())
+	}
+
+	err2 = scanner.Err()
+
+	if err != nil {
+		return []string{}, []string{}, err
+	}
+
+	if err2 != nil {
+		return []string{}, []string{}, err
+	}
+
+	return priceLines, taxLines, nil
 }
 
-// For printing to a straight .txt file
-
-// func OutputCalculations(t *prices.TaxIncludedPriceJob, fileName string) error {
-// 	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-// 	if err != nil {
-// 		f.Close()
-// 		return err
-// 	}
-// 	for k, v := range t.TaxIncludedPrices {
-// 		valueText := fmt.Sprintf("Pre-Tax Cost: %v, Tax rate: %%%.2f, Post tax price: %.2f\n", k, t.TaxRate*100, v)
-// 		f.Write([]byte(valueText))
-// 	}
-
-// 	f.Close()
-// 	return nil
-// }
-
-func WriteJson(data interface{}, fileName string) error {
-	f, err := os.Create(fileName)
+func (fm *FileManager) WriteJson(data interface{}) error {
+	f, err := os.Create(fm.OutputFilePath)
 
 	if err != nil {
 		f.Close()

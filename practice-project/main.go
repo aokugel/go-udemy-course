@@ -9,24 +9,26 @@ import (
 
 func main() {
 
+	//pick either the fileops or cmdmanager struct
 	fm := fileops.New("prices.txt", "taxrates.txt", "results.json")
+	//cmdm := cmdmanager.New()
 
-	taxRates, err1 := fm.GetInputFromFile("operand")
-	priceList, err2 := fm.GetInputFromFile("input")
+	priceList, taxRates, err1 := fm.GetInputFromFile()
 
-	if err1 != nil || err2 != nil {
-		fmt.Println(err1, err2)
+	if err1 != nil {
+		fmt.Println(err1)
 		return
 	}
 
+	//the slice of Taxincluded price jobs to run the calculations.
 	var taxRateJobList []prices.TaxIncludedPriceJob
 
 	for _, rate := range taxRates {
-		priceJob := prices.New(priceList, rate)
+		priceJob := prices.New(priceList, rate, fm)
 		priceJob.Process()
 		taxRateJobList = append(taxRateJobList, *priceJob)
 	}
 
-	fmt.Println(fileops.WriteJson(&taxRateJobList, "testFile.json"))
+	fm.WriteJson(&taxRateJobList)
 
 }
