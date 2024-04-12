@@ -23,6 +23,9 @@
 		},
 		{
 			"path": "../practice-project"
+		},
+		{
+			"path": "../concurrency-basics"
 		}
 	],
 	"settings": {}

@@ -23,12 +23,27 @@ func main() {
 	//the slice of Taxincluded price jobs to run the calculations.
 	var taxRateJobList []prices.TaxIncludedPriceJob
 
-	for _, rate := range taxRates {
+	doneChans := make([]chan bool, len(taxRates))
+	errorChans := make([]chan error, len(taxRates))
+
+	for index, rate := range taxRates {
+		doneChans[index] = make(chan bool)
 		priceJob := prices.New(priceList, rate, fm)
-		priceJob.Process()
+		go priceJob.Process(doneChans[index], errorChans[index])
 		taxRateJobList = append(taxRateJobList, *priceJob)
 	}
 
+	for i, _ := range taxRates {
+		select {
+		case err := <-errorChans[i]:
+			if err != nil {
+				fmt.Println(err)
+			}
+		case <-doneChans[i]:
+			fmt.Println("Done!")
+		}
+
+	}
 	fm.WriteJson(&taxRateJobList)
 
 }

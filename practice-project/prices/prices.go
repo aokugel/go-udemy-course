@@ -3,6 +3,7 @@ package prices
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"example.com/practice-project/iomanager"
 )
@@ -24,18 +25,24 @@ func New(prices []string, taxRate string, io iomanager.IOmanager) *TaxIncludedPr
 	}
 }
 
-func (t *TaxIncludedPriceJob) Process() {
+func (t *TaxIncludedPriceJob) Process(doneChan chan bool, errorChan chan error) {
 
 	for _, val := range t.Prices {
 		float64tax, err := strconv.ParseFloat(t.TaxRate, 64)
 		float64price, err2 := strconv.ParseFloat(val, 64)
 		t.TaxIncludedPrices[val] = (float64tax + 1.0) * float64price
 		if err != nil || err2 != nil {
-			fmt.Println(err, err2)
+			errorChan <- err
+			errorChan <- err2
+			return
 		}
 	}
 
+	time.Sleep(1 * time.Second)
+
 	fmt.Println(t.TaxIncludedPrices)
+
+	doneChan <- true
 
 }
 
